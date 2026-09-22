@@ -252,11 +252,14 @@ body{
   background:linear-gradient(transparent, rgba(0,0,0,.55) 55%);
   touch-action:auto;
 }
-.tools button{
+.tools button, .tools a{
   border:0;border-radius:999px;padding:6px 14px;cursor:pointer;font-family:inherit;font-size:11px;
   background:rgba(255,255,255,.14);color:rgba(255,255,255,.85);
+  text-decoration:none;display:inline-block;
 }
-.tools button:hover{background:rgba(255,255,255,.22);color:#fff}
+.tools button:hover, .tools a:hover{background:rgba(255,255,255,.22);color:#fff}
+.tools a#apk-link{background:rgba(63,227,236,.22);color:#CFFBFF}
+.tools a#apk-link:hover{background:rgba(63,227,236,.34)}
 .tools .dot{width:7px;height:7px;border-radius:50%;background:#E6A21E;display:inline-block;margin-right:6px}
 .tools .dot.live{background:#37D67A}
 
@@ -404,6 +407,7 @@ body{
 </div>
 
 <div class="tools">
+  <a id="apk-link" href="./AnimalDex.apk" download="AnimalDex.apk">&#11015; Get Android app</a>
   <button id="key-btn">&#9881; API key</button>
   <span><span class="dot" id="dot"></span><span id="dot-lbl">Sample data</span></span>
 </div>

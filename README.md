@@ -2,7 +2,9 @@
 
 A Pokédex-style animal encyclopedia for kids, inspired by the Johto Pokédex — built as a single-file, vanilla HTML/CSS/JS web app that emulates a physical handheld device.
 
-**Live app:** enable GitHub Pages on this repo (Settings → Pages → Deploy from branch → `main` / `root`) to get a URL like `https://<username>.github.io/<repo>/`.
+**🌐 Live app:** **[sharath-chandr.github.io/animalDex](https://sharath-chandr.github.io/animalDex/)**
+
+**📱 Download the Android app:** **[Click here to download AnimalDex.apk](https://sharath-chandr.github.io/animalDex/AnimalDex.apk)** — open this link on your phone, then tap the downloaded file to install (allow "install unknown apps" for your browser when prompted). It's a native wrapper around the same app with proper camera support.
 
 ## How it works
 
