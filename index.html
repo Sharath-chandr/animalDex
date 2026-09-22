@@ -206,6 +206,8 @@ body{
 .btn-round{
   position:absolute;width:44px;height:44px;border-radius:50%;
   background:var(--dark);border:0;padding:0;cursor:pointer;z-index:4;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font);font-size:16px;font-weight:800;color:rgba(255,255,255,.55);
   transition:transform .07s ease,filter .07s ease;
 }
 #btn-a{left:263px;top:553px}
@@ -220,6 +222,8 @@ body{
 .dpad button{
   position:absolute;border:0;padding:0;background:transparent;cursor:pointer;z-index:2;
   border-radius:8px;transition:background .07s ease;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:rgba(255,255,255,.5);line-height:1;
 }
 .dpad button:active,.dpad button.press{background:rgba(255,255,255,.22)}
 .dpad .up   {left:47.55px;top:0;      width:42.675px;height:47.55px}
@@ -227,13 +231,19 @@ body{
 .dpad .left {left:0;      top:47.55px;width:47.55px;height:42.675px}
 .dpad .right{left:91.45px;top:47.55px;width:47.55px;height:42.675px}
 
-/* Menu bar (Figma 12408:36) */
+/* Menu bar (Figma 12408:36) — thin pill, too narrow for its own text, so the
+   "MENU" print sits just above it on the shell, the way a real device would. */
 #btn-menu{
   position:absolute;left:172px;top:700px;width:58px;height:16px;border-radius:7px;
   background:var(--dark);border:0;padding:0;cursor:pointer;z-index:4;
   transition:transform .07s ease,filter .07s ease;
 }
 #btn-menu:active,#btn-menu.press{transform:scale(.92);filter:brightness(1.7)}
+.menu-label{
+  position:absolute;left:172px;top:684px;width:58px;text-align:center;z-index:4;
+  font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.08em;
+  color:rgba(255,255,255,.5);pointer-events:none;
+}
 
 /* Speaking light (Figma 12403:17063) */
 .speaking{
@@ -388,17 +398,18 @@ body{
   </div>
 
   <!-- controls -->
-  <button class="btn-round open-only" id="btn-a" data-btn="a" aria-label="A — scan or select"></button>
-  <button class="btn-round open-only" id="btn-b" data-btn="b" aria-label="B — back"></button>
+  <button class="btn-round open-only" id="btn-a" data-btn="a" aria-label="A — scan or select">A</button>
+  <button class="btn-round open-only" id="btn-b" data-btn="b" aria-label="B — back">B</button>
 
   <div class="dpad open-only">
     <span class="bar h"></span><span class="bar v"></span>
-    <button class="up"    data-btn="up"    aria-label="Up"></button>
-    <button class="down"  data-btn="down"  aria-label="Down"></button>
-    <button class="left"  data-btn="left"  aria-label="Left"></button>
-    <button class="right" data-btn="right" aria-label="Right"></button>
+    <button class="up"    data-btn="up"    aria-label="Up">▲</button>
+    <button class="down"  data-btn="down"  aria-label="Down">▼</button>
+    <button class="left"  data-btn="left"  aria-label="Left">◀</button>
+    <button class="right" data-btn="right" aria-label="Right">▶</button>
   </div>
 
+  <span class="menu-label open-only" aria-hidden="true">MENU</span>
   <button class="open-only" id="btn-menu" data-btn="menu" aria-label="Menu — collection"></button>
 
   <div class="speaking open-only" id="led"></div>
