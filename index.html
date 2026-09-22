@@ -659,15 +659,30 @@ function pickVoice(){
   return v.find(x => /^en-(GB|IN)/i.test(x.lang)) || v.find(x => /^en/i.test(x.lang)) || v[0] || null;
 }
 
+/* Android's WebView (used by the wrapper app) exposes window.speechSynthesis
+   but has no platform TTS binding behind it — speak() is a silent no-op there,
+   even though the identical page works fine in a real mobile browser tab. The
+   Android wrapper injects a native bridge (see MainActivity.java) that we
+   prefer whenever it's present; everywhere else (GitHub Pages, desktop, any
+   normal browser) falls through to the standard Web Speech API below. */
+const nativeTTS = (typeof AndroidTTS !== 'undefined' && AndroidTTS && AndroidTTS.isAvailable && AndroidTTS.isAvailable())
+  ? AndroidTTS : null;
+let nativeSpeaking = false;
+window.__animaldexTTS = {
+  onStart(){ nativeSpeaking = true;  ledOn(); },
+  onEnd(){   nativeSpeaking = false; ledOff(); },
+};
+
 /* Mobile Safari/WebKit only allows the FIRST speechSynthesis.speak() call to
    succeed when it runs synchronously inside a user-gesture handler; any speak()
    called later from an async flow (e.g. after `await fetch(...)`) is silently
    dropped unless one such "unlocking" call has already gone through in this
    page load. We fire a silent one the moment the device is opened, and again
-   on every physical button press as a safety net (idempotent — runs once). */
+   on every physical button press as a safety net (idempotent — runs once).
+   Not needed (and skipped) when the native bridge is doing the speaking. */
 let speechUnlocked = false;
 function unlockSpeech(){
-  if(speechUnlocked || !synth) return;
+  if(nativeTTS || speechUnlocked || !synth) return;
   try{
     const u = new SpeechSynthesisUtterance('​'); // zero-width space, effectively silent
     u.volume = 0;
@@ -677,8 +692,15 @@ function unlockSpeech(){
 }
 
 function narrate(text){
-  if(!synth || !text) return;
-  synth.cancel(); ledOff();
+  if(!text) return;
+  hush();
+
+  if(nativeTTS){
+    setTimeout(() => nativeTTS.speak(text), 30);
+    return; // ledOn/ledOff arrive via window.__animaldexTTS callbacks from Java
+  }
+
+  if(!synth) return;
   // A brief delay avoids a known Chrome/WebKit race where speak() called in
   // the same tick as cancel() is silently dropped.
   setTimeout(() => {
@@ -690,7 +712,12 @@ function narrate(text){
     setTimeout(() => { if(synth.speaking) ledOn(); }, 220);   // some browsers skip onstart
   }, 30);
 }
-function hush(){ if(synth) synth.cancel(); ledOff(); }
+function hush(){
+  if(nativeTTS) nativeTTS.cancel();
+  if(synth) synth.cancel();
+  ledOff();
+}
+function isSpeaking(){ return nativeTTS ? nativeSpeaking : !!(synth && synth.speaking); }
 if(synth) synth.addEventListener('voiceschanged', pickVoice);
 
 /* ------------------------------------------------------------ rendering */
@@ -743,7 +770,7 @@ function autoScroll(el){
   clearInterval(scroller);
   if(el.scrollHeight <= el.clientHeight) return;
   scroller = setInterval(() => {
-    if(!synth || !synth.speaking){ clearInterval(scroller); scroller = null; return; }
+    if(!isSpeaking()){ clearInterval(scroller); scroller = null; return; }
     if(el.scrollTop + el.clientHeight >= el.scrollHeight) return;
     el.scrollTop += 1;
   }, 90);
