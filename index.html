@@ -665,14 +665,15 @@ function pickVoice(){
    Android wrapper injects a native bridge (see MainActivity.java) that we
    prefer whenever it's present; everywhere else (GitHub Pages, desktop, any
    normal browser) falls through to the standard Web Speech API below. */
-/* Checked fresh on every call — NOT cached at load time. The native
-   TextToSpeech engine on the Java side initializes asynchronously and is
-   often not ready the instant this page's first script runs, so caching
-   this once as a const would permanently lock in "unavailable" even after
-   the bridge becomes ready moments later. */
+/* Presence-only check — never gate on engine readiness here. The native
+   TextToSpeech engine on the Java side initializes asynchronously and often
+   isn't ready yet the instant the page loads or the first button is tapped;
+   falling back to the WebView's speechSynthesis in that window would just
+   trade one silent no-op for another. Instead, whenever the bridge exists
+   at all we hand it the text unconditionally — MainActivity buffers it and
+   speaks it as soon as the engine finishes initializing. */
 function getNativeTTS(){
-  return (typeof AndroidTTS !== 'undefined' && AndroidTTS && AndroidTTS.isAvailable && AndroidTTS.isAvailable())
-    ? AndroidTTS : null;
+  return (typeof AndroidTTS !== 'undefined' && AndroidTTS) ? AndroidTTS : null;
 }
 let nativeSpeaking = false;
 window.__animaldexTTS = {
