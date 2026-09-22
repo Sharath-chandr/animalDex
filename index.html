@@ -665,8 +665,15 @@ function pickVoice(){
    Android wrapper injects a native bridge (see MainActivity.java) that we
    prefer whenever it's present; everywhere else (GitHub Pages, desktop, any
    normal browser) falls through to the standard Web Speech API below. */
-const nativeTTS = (typeof AndroidTTS !== 'undefined' && AndroidTTS && AndroidTTS.isAvailable && AndroidTTS.isAvailable())
-  ? AndroidTTS : null;
+/* Checked fresh on every call — NOT cached at load time. The native
+   TextToSpeech engine on the Java side initializes asynchronously and is
+   often not ready the instant this page's first script runs, so caching
+   this once as a const would permanently lock in "unavailable" even after
+   the bridge becomes ready moments later. */
+function getNativeTTS(){
+  return (typeof AndroidTTS !== 'undefined' && AndroidTTS && AndroidTTS.isAvailable && AndroidTTS.isAvailable())
+    ? AndroidTTS : null;
+}
 let nativeSpeaking = false;
 window.__animaldexTTS = {
   onStart(){ nativeSpeaking = true;  ledOn(); },
@@ -682,7 +689,7 @@ window.__animaldexTTS = {
    Not needed (and skipped) when the native bridge is doing the speaking. */
 let speechUnlocked = false;
 function unlockSpeech(){
-  if(nativeTTS || speechUnlocked || !synth) return;
+  if(getNativeTTS() || speechUnlocked || !synth) return;
   try{
     const u = new SpeechSynthesisUtterance('​'); // zero-width space, effectively silent
     u.volume = 0;
@@ -695,8 +702,9 @@ function narrate(text){
   if(!text) return;
   hush();
 
-  if(nativeTTS){
-    setTimeout(() => nativeTTS.speak(text), 30);
+  const nt = getNativeTTS();
+  if(nt){
+    setTimeout(() => nt.speak(text), 30);
     return; // ledOn/ledOff arrive via window.__animaldexTTS callbacks from Java
   }
 
@@ -713,11 +721,12 @@ function narrate(text){
   }, 30);
 }
 function hush(){
-  if(nativeTTS) nativeTTS.cancel();
+  const nt = getNativeTTS();
+  if(nt) nt.cancel();
   if(synth) synth.cancel();
   ledOff();
 }
-function isSpeaking(){ return nativeTTS ? nativeSpeaking : !!(synth && synth.speaking); }
+function isSpeaking(){ return getNativeTTS() ? nativeSpeaking : !!(synth && synth.speaking); }
 if(synth) synth.addEventListener('voiceschanged', pickVoice);
 
 /* ------------------------------------------------------------ rendering */
